@@ -98,9 +98,9 @@ class LoadedGaussianPolicy(BasePolicy, nn.Module):
             observation = obs
         else:
             observation = obs[None, :]
-        observation = torch.from_numpy(observation.astype(np.float32))
+        observation = ptu.from_numpy(observation.astype(np.float32))
         action = self(observation)
-        return action.detach().numpy()
+        return ptu.to_numpy(action)
 
     def save(self, filepath):
         torch.save(self.state_dict(), filepath)

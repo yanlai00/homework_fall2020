@@ -45,6 +45,7 @@ class RL_Trainer(object):
         self.env.seed(seed)
 
         # Maximum length for episodes
+        print("max_episode_steps", self.env.spec.max_episode_steps)
         self.params['ep_len'] = self.params['ep_len'] or self.env.spec.max_episode_steps
         MAX_VIDEO_LEN = self.params['ep_len']
 

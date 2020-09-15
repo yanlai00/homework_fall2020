@@ -82,13 +82,8 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
         # TODO return the action that the policy prescribes
         observation = ptu.from_numpy(observation)
-
-        if self.discrete:
-            logits = self.forward(observation)
-            action = np.argmax(logits, axis=1)
-        else:
-            action = self.forward(observation)
-        return ptu.to_numpy(action)
+        action_distr = self.forward(observation)
+        return ptu.to_numpy(action_distr.mean)
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
@@ -102,11 +97,11 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     def forward(self, observation: torch.FloatTensor) -> Any:
         if self.discrete:
             logits = self.logits_na(observation)
-            return logits
+            return torch.distributions.categorical.Categorical(logits=logits)
         else:
             mean = self.mean_net(observation)
             std = torch.exp(self.logstd)
-            return torch.normal(mean, std)
+            return torch.distributions.normal.Normal(mean, std)
         
 
 
@@ -116,10 +111,11 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 class MLPPolicySL(MLPPolicy):
     def __init__(self, ac_dim, ob_dim, n_layers, size, **kwargs):
         super().__init__(ac_dim, ob_dim, n_layers, size, **kwargs)
-        if self.discrete:
-            self.loss = nn.CrossEntropyLoss()
-        else:
-            self.loss = nn.MSELoss()
+        # if self.discrete:
+        #     self.loss = nn.CrossEntropyLoss()
+        # else:
+        #     self.loss = nn.MSELoss()
+        # self.loss = nn.MSELoss()
 
     def update(
             self, observations, actions,
@@ -129,13 +125,13 @@ class MLPPolicySL(MLPPolicy):
         observations = ptu.from_numpy(observations)
         actions = ptu.from_numpy(actions)
 
-        if self.discrete:
-            logits = self.forward(observations)
-            loss = self.loss(logits, actions)
-        else:
-            pred_actions = self.forward(observations)
-            loss = self.loss(actions, pred_actions)
+        pred_action_distr = self.forward(observations)
+        # pred_actions = pred_action_distr.rsample()
+        # print("actions", actions.shape, "pred_actions", pred_actions.shape)
+        # loss = self.loss(actions, pred_actions)
+        loss = - pred_action_distr.log_prob(actions).sum()
 
+        self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
         return {

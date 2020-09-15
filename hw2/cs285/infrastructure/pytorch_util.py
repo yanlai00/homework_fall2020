@@ -24,11 +24,14 @@ def build_mlp(
         size: int,
         activation: Activation = 'tanh',
         output_activation: Activation = 'identity',
-) -> nn.Module:
+):
     """
         Builds a feedforward neural network
 
         arguments:
+            input_placeholder: placeholder variable for the state (batch_size, input_size)
+            scope: variable scope of the network
+
             n_layers: number of hidden layers
             size: dimension of each hidden layer
             activation: activation of each hidden layer
@@ -38,25 +41,20 @@ def build_mlp(
             output_activation: activation of the output layer
 
         returns:
-            MLP (nn.Module)
+            output_placeholder: the result of a forward pass through the hidden layers + the output layer
     """
     if isinstance(activation, str):
         activation = _str_to_activation[activation]
     if isinstance(output_activation, str):
         output_activation = _str_to_activation[output_activation]
-
-    # TODO: return a MLP. This should be an instance of nn.Module
-    # Note: nn.Sequential is an instance of nn.Module.
-
     layers = []
-    layers.append(nn.Linear(input_size, size))
-    layers.append(activation)
-    for layer in range(n_layers - 1):
-        layers.append(nn.Linear(size, size))
+    in_size = input_size
+    for _ in range(n_layers):
+        layers.append(nn.Linear(in_size, size))
         layers.append(activation)
-    layers.append(nn.Linear(size, output_size))
+        in_size = size
+    layers.append(nn.Linear(in_size, output_size))
     layers.append(output_activation)
-
     return nn.Sequential(*layers)
 
 

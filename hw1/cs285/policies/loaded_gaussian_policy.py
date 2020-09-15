@@ -8,7 +8,6 @@ import pickle
 
 
 def create_linear_layer(W, b) -> nn.Linear:
-    # in_features, out_features = W.shape
     out_features, in_features = W.shape
     linear_layer = nn.Linear(
         in_features,

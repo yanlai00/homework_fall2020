@@ -114,6 +114,7 @@ class RL_Trainer(object):
                 self.logvideo = True
             else:
                 self.logvideo = False
+            self.log_video = self.logvideo
 
             # decide if metrics should be logged
             if self.params['scalar_log_freq'] == -1:
@@ -148,7 +149,7 @@ class RL_Trainer(object):
     ####################################
     ####################################
 
-    def collect_training_trajectories(self, itr, initial_expertdata, collect_policy, num_transitions_to_sample, save_expert_data_to_disk=False):
+    def collect_training_trajectories(self, itr, load_initial_expertdata, collect_policy, batch_size):
         # TODO: get this from hw1
         if itr == 0:
             if load_initial_expertdata:
@@ -160,8 +161,7 @@ class RL_Trainer(object):
                 # `self.params['batch_size_initial']` is the number of transitions you want to collect
             else:
                 batch_size = self.params['batch_size_initial']
-
-
+        
         # TODO collect `batch_size` samples to be used for training
         # HINT1: use sample_trajectories from utils
         # HINT2: you want each of these collected rollouts to be of length self.params['ep_len']

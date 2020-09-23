@@ -149,7 +149,7 @@ class MLPPolicyPG(MLPPolicy):
             log_pi = neg_log_probs
         else:
             log_pi = torch.sum(neg_log_probs, dim=1)
-        print(log_pi.shape)
+        # print(log_pi.shape)
         assert log_pi.shape == advantages.shape
         weighted_log_pi = log_pi * advantages
         loss = torch.mean(weighted_log_pi)

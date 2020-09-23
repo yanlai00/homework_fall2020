@@ -144,7 +144,12 @@ class MLPPolicyPG(MLPPolicy):
         # HINT3: don't forget that `optimizer.step()` MINIMIZES a loss
 
         policy = self(observations)
-        log_pi = torch.sum(-policy.log_prob(actions), dim=1)
+        neg_log_probs = -policy.log_prob(actions)
+        if len(neg_log_probs.shape) == 1:
+            log_pi = neg_log_probs
+        else:
+            log_pi = torch.sum(neg_log_probs, dim=1)
+        print(log_pi.shape)
         assert log_pi.shape == advantages.shape
         weighted_log_pi = log_pi * advantages
         loss = torch.mean(weighted_log_pi)

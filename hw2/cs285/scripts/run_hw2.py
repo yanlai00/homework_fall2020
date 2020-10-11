@@ -27,6 +27,7 @@ class PG_Trainer(object):
 
         train_args = {
             'num_agent_train_steps_per_iter': params['num_agent_train_steps_per_iter'],
+            'num_gd_steps': params['num_gd_steps']
         }
 
         agent_params = {**computation_graph_args, **estimate_advantage_args, **train_args}
@@ -70,6 +71,7 @@ def main():
     parser.add_argument('--learning_rate', '-lr', type=float, default=5e-3)
     parser.add_argument('--n_layers', '-l', type=int, default=2)
     parser.add_argument('--size', '-s', type=int, default=64)
+    parser.add_argument('--num_gd_steps', type=int, default=1)
 
     parser.add_argument('--ep_len', type=int) #students shouldn't change this away from env's default
     parser.add_argument('--seed', type=int, default=1)
@@ -77,6 +79,7 @@ def main():
     parser.add_argument('--which_gpu', '-gpu_id', default=0)
     parser.add_argument('--video_log_freq', type=int, default=-1)
     parser.add_argument('--scalar_log_freq', type=int, default=1)
+    parser.add_argument('--num_threads', type=int, default=1)
 
     parser.add_argument('--save_params', action='store_true')
 
@@ -112,4 +115,8 @@ def main():
 
 
 if __name__ == "__main__":
+    import timeit
+    start = timeit.default_timer()
     main()
+    stop = timeit.default_timer()
+    print('Time: ', stop - start)  

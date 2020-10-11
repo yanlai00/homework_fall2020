@@ -47,7 +47,8 @@ class PGAgent(BaseAgent):
 
         # TODO: step 3: use all datapoints (s_t, a_t, q_t, adv_t) to update the PG actor/policy
         ## HINT: `train_log` should be returned by your actor update method
-        train_log = self.actor.update(observations, actions, advantages, q_values)
+        for _ in range(self.agent_params['num_gd_steps']):
+            train_log = self.actor.update(observations, actions, advantages, q_values)
 
         return train_log
 

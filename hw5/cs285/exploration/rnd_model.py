@@ -31,8 +31,10 @@ class RNDModel(nn.Module, BaseExplorationModel):
         # HINT 1) Check out the method ptu.build_mlp
         # HINT 2) There are two weight init methods defined above
 
-        self.f = None
-        self.f_hat = None
+        self.f = ptu.build_mlp(input_size=self.ob_dim, output_size=self.output_size, n_layers=self.n_layers,
+                               size=self.size, init_method=init_method_1)
+        self.f_hat = ptu.build_mlp(input_size=self.ob_dim, output_size=self.output_size, n_layers=self.n_layers,
+                                   size=self.size, init_method=init_method_2)
         
         self.optimizer = self.optimizer_spec.constructor(
             self.f_hat.parameters(),
@@ -50,7 +52,7 @@ class RNDModel(nn.Module, BaseExplorationModel):
     def forward(self, ob_no):
         # TODO: Get the prediction error for ob_no
         # HINT: Remember to detach the output of self.f!
-        error = None
+        error = self.f(ob_no).detach() - self.f_hat(ob_no)
         return error
 
     def forward_np(self, ob_no):
@@ -60,5 +62,9 @@ class RNDModel(nn.Module, BaseExplorationModel):
 
     def update(self, ob_no):
         # TODO: Update f_hat using ob_no
-        loss = None
+        loss = self.loss(self.f(ob_no).detach(), self.f_hat(ob_no))
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        self.learning_rate_scheduler.step()
         return loss.item()

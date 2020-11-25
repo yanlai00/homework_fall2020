@@ -53,7 +53,7 @@ class RNDModel(nn.Module, BaseExplorationModel):
         # TODO: Get the prediction error for ob_no
         # HINT: Remember to detach the output of self.f!
         error = self.f(ob_no).detach() - self.f_hat(ob_no)
-        return error
+        return torch.norm(error, dim=1) ** 2
 
     def forward_np(self, ob_no):
         ob_no = ptu.from_numpy(ob_no)
@@ -62,7 +62,8 @@ class RNDModel(nn.Module, BaseExplorationModel):
 
     def update(self, ob_no):
         # TODO: Update f_hat using ob_no
-        loss = self.loss(self.f(ob_no).detach(), self.f_hat(ob_no))
+        ob_no = ptu.from_numpy(ob_no)
+        loss = torch.mean(self(ob_no))
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()

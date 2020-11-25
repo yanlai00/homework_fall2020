@@ -45,7 +45,6 @@ class RNDModel(nn.Module, BaseExplorationModel):
             self.optimizer_spec.learning_rate_schedule,
         )
 
-        self.loss = nn.MSELoss() 
         self.f.to(ptu.device)
         self.f_hat.to(ptu.device)
 

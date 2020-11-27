@@ -380,42 +380,43 @@ class RL_Trainer(object):
             self.logger.flush()
 
     def dump_density_graphs(self, itr):
-        import matplotlib.pyplot as plt
-        self.fig = plt.figure()
-        filepath = lambda name: self.params['logdir']+'/curr_{}.png'.format(name)
+        if not self.params['use_dynamics']:
+            import matplotlib.pyplot as plt
+            self.fig = plt.figure()
+            filepath = lambda name: self.params['logdir']+'/curr_{}.png'.format(name)
 
-        num_states = self.agent.replay_buffer.num_in_buffer - 2
-        states = self.agent.replay_buffer.obs[:num_states]
-        if num_states <= 0: return
-        
-        H, xedges, yedges = np.histogram2d(states[:,0], states[:,1], range=[[0., 1.], [0., 1.]], density=True)
-        plt.imshow(np.rot90(H), interpolation='bicubic')
-        plt.colorbar()
-        plt.title('State Density')
-        self.fig.savefig(filepath('state_density'), bbox_inches='tight')
+            num_states = self.agent.replay_buffer.num_in_buffer - 2
+            states = self.agent.replay_buffer.obs[:num_states]
+            if num_states <= 0: return
+            
+            H, xedges, yedges = np.histogram2d(states[:,0], states[:,1], range=[[0., 1.], [0., 1.]], density=True)
+            plt.imshow(np.rot90(H), interpolation='bicubic')
+            plt.colorbar()
+            plt.title('State Density')
+            self.fig.savefig(filepath('state_density'), bbox_inches='tight')
 
-        plt.clf()
-        ii, jj = np.meshgrid(np.linspace(0, 1), np.linspace(0, 1))
-        obs = np.stack([ii.flatten(), jj.flatten()], axis=1)
-        density = self.agent.exploration_model.forward_np(obs)
-        density = density.reshape(ii.shape)
-        plt.imshow(density[::-1])
-        plt.colorbar()
-        plt.title('RND Value')
-        self.fig.savefig(filepath('rnd_value'), bbox_inches='tight')
+            plt.clf()
+            ii, jj = np.meshgrid(np.linspace(0, 1), np.linspace(0, 1))
+            obs = np.stack([ii.flatten(), jj.flatten()], axis=1)
+            density = self.agent.exploration_model.forward_np(obs)
+            density = density.reshape(ii.shape)
+            plt.imshow(density[::-1])
+            plt.colorbar()
+            plt.title('RND Value')
+            self.fig.savefig(filepath('rnd_value'), bbox_inches='tight')
 
-        plt.clf()
-        exploitation_values = self.agent.exploitation_critic.qa_values(obs).mean(-1)
-        exploitation_values = exploitation_values.reshape(ii.shape)
-        plt.imshow(exploitation_values[::-1])
-        plt.colorbar()
-        plt.title('Predicted Exploitation Value')
-        self.fig.savefig(filepath('exploitation_value'), bbox_inches='tight')
+            plt.clf()
+            exploitation_values = self.agent.exploitation_critic.qa_values(obs).mean(-1)
+            exploitation_values = exploitation_values.reshape(ii.shape)
+            plt.imshow(exploitation_values[::-1])
+            plt.colorbar()
+            plt.title('Predicted Exploitation Value')
+            self.fig.savefig(filepath('exploitation_value'), bbox_inches='tight')
 
-        plt.clf()
-        exploration_values = self.agent.exploration_critic.qa_values(obs).mean(-1)
-        exploration_values = exploration_values.reshape(ii.shape)
-        plt.imshow(exploration_values[::-1])
-        plt.colorbar()
-        plt.title('Predicted Exploration Value')
-        self.fig.savefig(filepath('exploration_value'), bbox_inches='tight')
+            plt.clf()
+            exploration_values = self.agent.exploration_critic.qa_values(obs).mean(-1)
+            exploration_values = exploration_values.reshape(ii.shape)
+            plt.imshow(exploration_values[::-1])
+            plt.colorbar()
+            plt.title('Predicted Exploration Value')
+            self.fig.savefig(filepath('exploration_value'), bbox_inches='tight')
